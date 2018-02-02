@@ -19,14 +19,15 @@ public class monster_spawn : MonoBehaviour
     private float velocity_coefficient;//出怪的速度系数
                                        // Use this for initialization
 
-    private int difficulties = 1;
+    [SerializeField]
+    private int difficulties;
 
     void Start()
     {
 
-        time_gap = Random.Range(4, 6);//第一波怪前的初始时间
-        //刷怪点
-
+        time_gap = 3;//第一波怪前的初始时间
+                     //刷怪点
+        difficulties = 1;
 
         spawn_pos[0] = GameObject.Find("monster_nest01").transform.position;
         spawn_pos[1] = GameObject.Find("monster_nest02").transform.position;
@@ -45,8 +46,9 @@ public class monster_spawn : MonoBehaviour
         //    if (Spawn_pos.x > 0) Spawn_pos.x = Spawn_pos.x - 1.0f;
 
         //}
-
+        
         StartCoroutine(Difficulties());
+
         //StartCoroutine(Monster_generator());
 
     }
@@ -68,45 +70,27 @@ public class monster_spawn : MonoBehaviour
         while (isgameon)
         {
             yield return new WaitForSeconds(time_gap);
-            int Set_number=1;
+            int Set_number = 1;
 
 
-            if (difficulties >= 12)
-            {
-                Set_number = Random.Range(4, 6);//6种
-            }
-            else {
-                if(difficulties >9){
-                    Set_number = Random.Range(3, 5);
-                }
-                else{
-                    if(difficulties>6){
-                        Set_number = Random.Range(2, 4);
-                    }
-                    else{
-                        if(difficulties>3){
-                            Set_number = Random.Range(1, 3);
-                        }
-                        else{
-                            if (difficulties>1)
-                            {
-                                Set_number = 2;
-                            }
-                        }
-                    }
-                }
-            }
+            if (difficulties >= 1) Set_number = 1;
+            if (difficulties > 3) Set_number = Random.Range(2, 4);
+            if (difficulties > 5) Set_number = Random.Range(3, 5);
+            if (difficulties > 7) Set_number = Random.Range(4, 6);
+            if (difficulties > 9) Set_number = Random.Range(4, 7);
+
+            Debug.Log("Set"+Set_number);
 
             int[] spawn_point = new int[2];
-            spawn_point[0] = Random.Range(0, 3);//随机出生点1    
-            spawn_point[1] = Random.Range(0, 3);//随机出生点2
+            spawn_point[0] = Random.Range(0, 4);//随机出生点1    
+            spawn_point[1] = Random.Range(0, 4);//随机出生点2
 
             int[] Multi_pickrange = new int[2];
-            Multi_pickrange[0] = Random.Range(0, 1);//辅助确定选择范围
-            Multi_pickrange[1] = Random.Range(0, 1);
+            Multi_pickrange[0] = Random.Range(0, 2);//辅助确定选择范围
+            Multi_pickrange[1] = Random.Range(0, 2);
             switch (Set_number)
             {
-                
+
                 case 1://单低阶
                     MonsterCreator1_3(spawn_point[0]);
                     break;
@@ -119,7 +103,7 @@ public class monster_spawn : MonoBehaviour
                         yield return new WaitForSeconds(1.5f);
                     }
                     break;
-                    
+
                 case 3://单高阶
                     MonsterCreator4_6(spawn_point[0]);
                     break;
@@ -155,21 +139,22 @@ public class monster_spawn : MonoBehaviour
                     }
                     break;
 
-                         
+
 
                 default: break;
             }
-            time_gap = Random.Range(3, 6);
+            time_gap = 5;//Random.Range(3, 6);
         }
     }
 
     //生成器
     void MonsterCreator1_3(int spawn_point)
     {
-        int object_number = Random.Range(0, 2);
+        int object_number = Random.Range(0, 3);
         Quaternion direction = Quaternion.identity;
-        if(spawn_point%2==0){
-            direction = Quaternion.AngleAxis(180.0f,Vector3.up);
+        if (spawn_point % 2 == 0)
+        {
+            direction = Quaternion.AngleAxis(180.0f, Vector3.up);
         }
         Transform monster_clone = Instantiate(monsters[object_number], spawn_pos[spawn_point], direction);
         rb_mon = monster_clone.GetComponent<Rigidbody2D>();
@@ -181,13 +166,18 @@ public class monster_spawn : MonoBehaviour
 
     void MonsterCreator4_6(int spawn_point)
     {
-        int object_number = Random.Range(3, 5);
-        Transform monster_clone = Instantiate(monsters[object_number], spawn_pos[spawn_point], Quaternion.identity);
+        int object_number = Random.Range(3, 6);
+        Quaternion direction = Quaternion.identity;
+        if (spawn_point % 2 == 0)
+        {
+            direction = Quaternion.AngleAxis(180.0f, Vector3.up);
+        }
+        Transform monster_clone = Instantiate(monsters[object_number], spawn_pos[spawn_point], direction);
         rb_mon = monster_clone.GetComponent<Rigidbody2D>();
         if (spawn_point % 2 == 0)
-            rb_mon.velocity = (Vector2.left * Mathf.Log(velocity_coefficient*difficulties,2.0f));
+            rb_mon.velocity = (Vector2.left * Mathf.Log(velocity_coefficient * difficulties, 2.0f));
         else
-            rb_mon.velocity = (Vector2.right * Mathf.Log(velocity_coefficient*difficulties, 2.0f));
+            rb_mon.velocity = (Vector2.right * Mathf.Log(velocity_coefficient * difficulties, 2.0f));
     }
 
     public void Start_Game()
@@ -195,20 +185,24 @@ public class monster_spawn : MonoBehaviour
         difficulties = 1;
         isgameon = true;
         StartCoroutine(Monster_generator());
+        //StartCoroutine(Difficulties());//加在这里会导致第二次启动游戏是有两个coroutine在跑
     }
 
     IEnumerator Difficulties()
     {
-        
+
         yield return new WaitForSeconds(2);//补偿初始等待时间
-        while(isgameon){
+        
+        while (isgameon)
+        {
             difficulties++;
-        yield return new WaitForSeconds(8);
+            Debug.Log(difficulties);
+            yield return new WaitForSeconds(5);
         }
     }
 
 
-    ////六种,函数数组？
+    //六种,函数数组？
     //void spawn_1in6(int []range, int []pos){
     //    if (range[0] <= 0) MonsterCreator1_3(pos[0]);
     //    else MonsterCreator4_6(pos[0]);

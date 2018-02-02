@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 
-public class StartGame : MonoBehaviour {
+public class StartGame : MonoBehaviour
+{
 
     public SourceManager sourceManager;
     public Connecter[] connecters;
@@ -18,6 +19,10 @@ public class StartGame : MonoBehaviour {
         foreach (var go in FindObjectsOfType<monster_manage>())
             DestroyImmediate(go.gameObject);
 
+        //启动生成器
+        GameObject spawn_gb = GameObject.FindGameObjectWithTag("Spawn");
+        spawn_gb.GetComponent<monster_spawn>().Start_Game();
+
         gameObject.SetActive(false);
         sourceManager.restart();
         foreach (var c in connecters)
@@ -29,8 +34,7 @@ public class StartGame : MonoBehaviour {
             if (c != null) c.StartGame();
         }
 
-        GameObject spawn_gb = GameObject.FindGameObjectWithTag("Spawn");
-        spawn_gb.GetComponent<monster_spawn>().Start_Game();
+
 
     }
 
